@@ -60,7 +60,7 @@ def chat(user_text):
     conversation_history.append({'role': 'user', 'content': user_text})
     resp = client.chat.completions(
         messages=conversation_history,
-        model='sarvam-m',
+        model='sarvam-105b-conversations',
     )
     reply = resp.choices[0].message.content
     conversation_history.append({'role': 'assistant', 'content': reply})
@@ -71,10 +71,10 @@ def text_to_speech(text):
     resp = client.text_to_speech.convert(
         text=text,
         language_code='hi-IN',
-        speaker='anushka',
-        model='bulbul:v2',
+        speaker='ritu',
+        model='bulbul:v3',
     )
-    audio_bytes = base64.b64decode(resp.audio)
+    audio_bytes = base64.b64decode(resp.audios[0])
     tmp = tempfile.NamedTemporaryFile(suffix='.wav', delete=False)
     tmp.write(audio_bytes)
     tmp.flush()

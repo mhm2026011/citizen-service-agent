@@ -37,55 +37,80 @@ def index():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
-    user_text = data.get("text", "").strip()
-    if not user_text:
-        return jsonify({"error": "Empty message"}), 400
+    try:
+        data = request.get_json()
+        user_text = data.get("text", "").strip()
+        if not user_text:
+            return jsonify({"error": "Empty message"}), 400
 
-    history = get_history()
-    history.append({"role": "user", "content": user_text})
+        history = get_history()
+        history.append({"role": "user", "content": user_text})
 
-    resp = client.chat.completions(messages=history, model="sarvam-105b-conversations")
-    reply = resp.choices[0].message.content
-    history.append({"role": "assistant", "content": reply})
-    session["history"] = history
-    session.modified = True
-    return jsonify({"reply": reply})
+        resp = client.chat.completions(messages=history, model="sarvam-105b-conversations")
+        reply = resp.choices[0].message.content
+        history.append({"role": "assistant", "content": reply})
+        session["history"] = history
+        session.modified = True
+        return jsonify({"reply": reply})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/stt", methods=["POST"])
 def stt():
-    audio_file = request.files.get("audio")
-    if not audio_file:
-        return jsonify({"error": "No audio"}), 400
+    try:
+        audio_file = request.files.get("audio")
+        if not audio_file:
+            return jsonify({"error": "No audio file received"}), 400
 
-    tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
-    audio_file.save(tmp.name)
+        # Detect format from browser (MediaRecorder sends webm)
+        ext = ".webm" if "webm" in (audio_file.content_type or "") else ".wav"
+        mime = "audio/webm" if ext == ".webm" else "audio/wav"
 
-    with open(tmp.name, "rb") as f:
-        resp = client.speech_to_text.transcribe(
-            file=("audio.wav", f, "audio/wav"),
-            model="saaras:v4",
-            language_code="unknown",
-        )
-    os.unlink(tmp.name)
-    return jsonify({"transcript": resp.transcript})
+        # On Windows, delete=False + explicit close is required to avoid WinError 32
+        tmp = tempfile.NamedTemporaryFile(suffix=ext, delete=False)
+        tmp_path = tmp.name
+        audio_file.save(tmp_path)
+        tmp.close()  # Must close before re-opening on Windows
+
+        try:
+            with open(tmp_path, "rb") as f:
+                resp = client.speech_to_text.transcribe(
+                    file=(f"audio{ext}", f, mime),
+                    model="saaras:v4",
+                    language_code="unknown",
+                )
+            transcript = resp.transcript or ""
+        finally:
+            try:
+                os.unlink(tmp_path)  # Clean up even if transcription fails
+            except Exception:
+                pass
+
+        return jsonify({"transcript": transcript})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/tts", methods=["POST"])
 def tts():
-    data = request.get_json()
-    text = data.get("text", "")[:500]
-    lang = data.get("lang", "hi-IN")
+    try:
+        data = request.get_json()
+        text = data.get("text", "").strip()[:500]
+        lang = data.get("lang", "hi-IN")
+        if not text:
+            return jsonify({"error": "Empty text"}), 400
 
-    resp = client.text_to_speech.convert(
-        text=text,
-        language_code=lang,
-        speaker="anushka",
-        model="bulbul:v2",
-    )
-    audio_b64 = resp.audio
-    return jsonify({"audio_b64": audio_b64})
+        resp = client.text_to_speech.convert(
+            text=text,
+            language_code=lang,
+            speaker="ritu",
+            model="bulbul:v3",
+        )
+        audio_b64 = resp.audios[0]
+        return jsonify({"audio_b64": audio_b64})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/reset", methods=["POST"])
