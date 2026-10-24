@@ -1,0 +1,511 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Citizen Service Agent</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23152238' /><path d='M25 70 L25 30 C35 30 45 35 50 40 C55 35 65 30 75 30 L75 70 C65 70 55 75 50 80 C45 75 35 70 25 70 Z' fill='%23F4C430' /><line x1='50' y1='40' x2='50' y2='80' stroke='%23152238' stroke-width='3' /></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Citizen Services Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  min-height: 100vh;
+  color: #f1f5f9;
+  overflow: hidden;
+}
+
+/* Animated background orbs */
+.orb {
+  position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.15; pointer-events: none; z-index: 0;
+  animation: float 8s ease-in-out infinite;
+}
+.orb1 { width: 400px; height: 400px; background: #f97316; top: -100px; left: -100px; animation-delay: 0s; }
+.orb2 { width: 350px; height: 350px; background: #3b82f6; bottom: -80px; right: -80px; animation-delay: -3s; }
+.orb3 { width: 250px; height: 250px; background: #22c55e; top: 50%; left: 50%; animation-delay: -6s; }
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+/* Header */
+.header {
+  position: relative; z-index: 10;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 14px 24px;
+  display: flex; align-items: center; gap: 14px;
+}
+.header .logo-wrap { display: flex; align-items: center; gap: 12px; }
+.header .logo-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 15px rgba(249,115,22,0.4);
+}
+.header h1 { font-size: 18px; font-weight: 700; color: white; }
+.header p { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+.header .live-badge {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3);
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #4ade80;
+}
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: pulse-green 1.5s infinite; }
+@keyframes pulse-green { 0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); } 50% { box-shadow: 0 0 0 5px rgba(74,222,128,0); } }
+
+/* Layout */
+.container { display: flex; height: calc(100vh - 71px); position: relative; z-index: 5; }
+
+/* Sidebar */
+.sidebar {
+  width: 255px; flex-shrink: 0;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  padding: 18px 14px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.sidebar-title {
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.35);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; padding: 0 4px;
+}
+.quick-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 12px; border-radius: 10px; border: none;
+  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8);
+  cursor: pointer; text-align: left; font-size: 13px; font-family: inherit;
+  transition: all 0.2s; border: 1px solid transparent;
+}
+.quick-btn:hover {
+  background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.15);
+  color: white; transform: translateX(3px);
+}
+.quick-btn .qicon {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
+}
+.q1 .qicon { background: rgba(249,115,22,0.2); }
+.q2 .qicon { background: rgba(59,130,246,0.2); }
+.q3 .qicon { background: rgba(168,85,247,0.2); }
+.q4 .qicon { background: rgba(16,185,129,0.2); }
+.q5 .qicon { background: rgba(245,158,11,0.2); }
+.q6 .qicon { background: rgba(236,72,153,0.2); }
+.q7 .qicon { background: rgba(99,102,241,0.2); }
+
+.sidebar hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 10px 0; }
+.sidebar-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 6px; padding: 0 4px; font-weight: 500; }
+.lang-select {
+  width: 100%; padding: 8px 10px; border-radius: 8px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: white; font-size: 13px; font-family: inherit; outline: none; cursor: pointer;
+}
+.lang-select option { background: #1e1b4b; color: white; }
+.reset-btn {
+  margin-top: 8px; width: 100%; padding: 9px; border-radius: 9px; border: none;
+  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25);
+  color: #f87171; font-size: 13px; font-family: inherit; cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.reset-btn:hover { background: rgba(239,68,68,0.22); color: #fca5a5; }
+
+/* Chat area */
+.chat-area { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+/* Status bar */
+.status-bar {
+  padding: 8px 20px; display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; transition: background 0.3s; }
+.status-dot.listening { background: #fb923c; animation: blink 0.8s infinite; }
+.status-dot.thinking { background: #60a5fa; animation: blink 0.5s infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+/* Messages */
+.messages {
+  flex: 1; overflow-y: auto; padding: 24px 20px;
+  display: flex; flex-direction: column; gap: 18px;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* Welcome card */
+.welcome-card {
+  align-self: center; max-width: 480px; text-align: center;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 32px 28px;
+  animation: fadeUp 0.5s ease;
+}
+.welcome-card .emoji-big { font-size: 52px; margin-bottom: 12px; display: block; animation: wave 2s ease-in-out infinite; }
+@keyframes wave { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(10deg); } 75% { transform: rotate(-5deg); } }
+.welcome-card h2 { font-size: 20px; font-weight: 700; color: white; margin-bottom: 8px; }
+.welcome-card p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+.welcome-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+.welcome-chip {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 5px 12px; font-size: 12px; color: rgba(255,255,255,0.7); cursor: pointer;
+  transition: all 0.2s;
+}
+.welcome-chip:hover { background: rgba(255,255,255,0.15); color: white; transform: scale(1.03); }
+
+/* Messages */
+.msg { display: flex; gap: 10px; animation: fadeUp 0.3s ease; }
+.msg.user { flex-direction: row-reverse; align-self: flex-end; max-width: 75%; }
+.msg.agent { align-self: flex-start; max-width: 80%; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.agent .avatar { background: linear-gradient(135deg, #6366f1, #8b5cf6); box-shadow: 0 2px 10px rgba(99,102,241,0.4); }
+.user .avatar { background: linear-gradient(135deg, #f97316, #ef4444); box-shadow: 0 2px 10px rgba(249,115,22,0.4); }
+
+.bubble {
+  padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.65;
+}
+.agent .bubble {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+  border-top-left-radius: 4px; color: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+}
+.user .bubble {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border-top-right-radius: 4px; color: white;
+  box-shadow: 0 4px 15px rgba(99,102,241,0.35);
+}
+.play-btn {
+  margin-top: 6px; display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.6); border-radius: 20px; padding: 4px 10px;
+  font-size: 12px; cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+.play-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+/* Typing indicator */
+.typing-indicator { display: flex; gap: 5px; padding: 4px 0; align-items: center; }
+.dot {
+  width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4);
+  animation: bounce 1.2s infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-8px); background: rgba(255,255,255,0.7); } }
+
+/* Input bar */
+.input-bar {
+  padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.04);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+}
+.text-input {
+  flex: 1; padding: 11px 18px; border-radius: 24px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: white; font-size: 14px; font-family: inherit; outline: none;
+  transition: all 0.2s; caret-color: #6366f1;
+}
+.text-input::placeholder { color: rgba(255,255,255,0.3); }
+.text-input:focus { background: rgba(255,255,255,0.12); border-color: rgba(99,102,241,0.6); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+
+.mic-btn, .send-btn {
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.mic-btn {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.7);
+}
+.mic-btn:hover { background: rgba(255,255,255,0.15); color: white; transform: scale(1.05); }
+.mic-btn.recording {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-color: transparent; color: white;
+  box-shadow: 0 0 0 0 rgba(239,68,68,0.5);
+  animation: mic-pulse 1s infinite;
+}
+@keyframes mic-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+.send-btn {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white; box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+}
+.send-btn:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(99,102,241,0.5); }
+.send-btn:active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+
+<!-- Background orbs -->
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo-wrap">
+    <div class="logo-icon">🏛️</div>
+    <div>
+      <h1>Citizen Services Agent</h1>
+      <p>Powered by Sarvam AI • Hindi, English & Regional Languages</p>
+    </div>
+  </div>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    Live
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-title">Quick Queries</div>
+
+    <button class="quick-btn q1" onclick="sendQuick(this)"><div class="qicon">💰</div>PM-KISAN scheme eligibility</button>
+    <button class="quick-btn q2" onclick="sendQuick(this)"><div class="qicon">🏥</div>Ayushman Bharat enrollment</button>
+    <button class="quick-btn q3" onclick="sendQuick(this)"><div class="qicon">📄</div>How to get birth certificate</button>
+    <button class="quick-btn q4" onclick="sendQuick(this)"><div class="qicon">🪪</div>Aadhaar update process</button>
+    <button class="quick-btn q5" onclick="sendQuick(this)"><div class="qicon">🧾</div>Income tax filing help</button>
+    <button class="quick-btn q6" onclick="sendQuick(this)"><div class="qicon">👴</div>Old age pension apply</button>
+    <button class="quick-btn q7" onclick="sendQuick(this)"><div class="qicon">💼</div>MGNREGA job card</button>
+
+    <hr>
+    <div class="sidebar-label">🔊 Voice Language</div>
+    <select class="lang-select" id="langSelect">
+      <option value="hi-IN">🇮🇳 Hindi</option>
+      <option value="en-IN">🇮🇳 English (India)</option>
+      <option value="ta-IN">Tamil</option>
+      <option value="te-IN">Telugu</option>
+      <option value="kn-IN">Kannada</option>
+      <option value="mr-IN">Marathi</option>
+      <option value="bn-IN">Bengali</option>
+    </select>
+
+    <button class="reset-btn" onclick="resetChat()">🗑️ Clear Conversation</button>
+  </div>
+
+  <!-- Chat area -->
+  <div class="chat-area">
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Ready to help</span>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="welcome-card">
+        <span class="emoji-big">🙏</span>
+        <h2>Namaste! How can I help?</h2>
+        <p>Ask me about government schemes, taxes, pensions, certificates, or any citizen service in your language.</p>
+        <div class="welcome-chips">
+          <span class="welcome-chip" onclick="sendToAgent('What schemes are available for farmers?')">🌾 Farmer schemes</span>
+          <span class="welcome-chip" onclick="sendToAgent('How to apply for PAN card?')">🪪 PAN card</span>
+          <span class="welcome-chip" onclick="sendToAgent('Pension eligibility criteria')">👴 Pension</span>
+          <span class="welcome-chip" onclick="sendToAgent('How to file income tax return?')">🧾 Income tax</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-bar">
+      <button class="mic-btn" id="micBtn" onclick="toggleRecording()" title="Click to speak">🎤</button>
+      <input class="text-input" id="textInput"
+        placeholder="Type your query... or 🎤 to speak"
+        onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendText(); }">
+      <button class="send-btn" onclick="sendText()" title="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let mediaRecorder = null, audioChunks = [], isRecording = false;
+
+function setStatus(text, type) {
+  document.getElementById('statusText').textContent = text;
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot' + (type ? ' ' + type : '');
+}
+
+function addMessage(role, text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const avatar = role === 'agent' ? '🤖' : '👤';
+  div.innerHTML = `
+    <div class="avatar">${avatar}</div>
+    <div>
+      <div class="bubble">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>
+      ${role === 'agent' ? '<button class="play-btn" onclick="speakText(this)" data-text="'+encodeURIComponent(text)+'">🔊 Play audio</button>' : ''}
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg agent'; div.id = 'typing';
+  div.innerHTML = '<div class="avatar">🤖</div><div class="bubble"><div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+
+async function sendText() {
+  const input = document.getElementById('textInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  await sendToAgent(text);
+}
+
+async function sendQuick(btn) {
+  const text = btn.querySelector('.qicon').nextSibling.textContent.trim();
+  await sendToAgent(text);
+}
+
+async function sendToAgent(text) {
+  addMessage('user', text);
+  showTyping();
+  setStatus('Thinking...', 'thinking');
+  try {
+    const resp = await fetch('/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text})
+    });
+    const data = await resp.json();
+    removeTyping();
+    if (data.reply) {
+      addMessage('agent', data.reply);
+      setStatus('Ready to help', '');
+      autoSpeak(data.reply);
+    } else if (data.error) {
+      addMessage('agent', '⚠️ ' + data.error);
+      setStatus('Error', '');
+    }
+  } catch(e) {
+    removeTyping();
+    addMessage('agent', '⚠️ Could not reach server. Make sure Flask is running at http://127.0.0.1:5000');
+    setStatus('Connection error', '');
+  }
+}
+
+async function speakText(btn) {
+  const text = decodeURIComponent(btn.getAttribute('data-text'));
+  const lang = document.getElementById('langSelect').value;
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Loading...';
+  try {
+    const resp = await fetch('/tts', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text, lang})
+    });
+    const data = await resp.json();
+    if (data.audio_b64) {
+      const audio = new Audio('data:audio/wav;base64,' + data.audio_b64);
+      audio.play();
+      btn.textContent = '🔊 Playing...';
+      audio.onended = () => btn.textContent = '🔊 Play audio';
+    } else {
+      btn.textContent = '❌ Failed';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+  } catch(e) {
+    btn.textContent = '❌ Error';
+    setTimeout(() => btn.textContent = orig, 2000);
+  }
+}
+
+async function autoSpeak(text) {
+  const lang = document.getElementById('langSelect').value;
+  try {
+    const resp = await fetch('/tts', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text, lang})
+    });
+    const data = await resp.json();
+    if (data.audio_b64) {
+      const audio = new Audio('data:audio/wav;base64,' + data.audio_b64);
+      audio.play();
+    }
+  } catch(e) {}
+}
+
+async function toggleRecording() {
+  if (isRecording) { mediaRecorder.stop(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    mediaRecorder = new MediaRecorder(stream, {mimeType: 'audio/webm'});
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+      isRecording = false;
+      document.getElementById('micBtn').className = 'mic-btn';
+      document.getElementById('micBtn').textContent = '🎤';
+      setStatus('Transcribing...', 'listening');
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(audioChunks, {type:'audio/webm'});
+      const form = new FormData();
+      form.append('audio', blob, 'audio.webm');
+      try {
+        const resp = await fetch('/stt', {method:'POST', body:form});
+        const data = await resp.json();
+        if (data.transcript && data.transcript.trim()) {
+          await sendToAgent(data.transcript);
+        } else if (data.error) {
+          setStatus('STT error: ' + data.error, '');
+        } else {
+          setStatus('Could not understand. Try again.', '');
+        }
+      } catch(e) { setStatus('STT failed: ' + e.message, ''); }
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    document.getElementById('micBtn').className = 'mic-btn recording';
+    document.getElementById('micBtn').textContent = '⏹';
+    setStatus('Listening... click ⏹ to stop', 'listening');
+  } catch(e) {
+    setStatus('Mic access denied. Please allow microphone.', '');
+  }
+}
+
+async function resetChat() {
+  try { await fetch('/reset', {method:'POST'}); } catch(e) {}
+  document.getElementById('messages').innerHTML = `
+    <div class="welcome-card">
+      <span class="emoji-big">🙏</span>
+      <h2>Namaste! How can I help?</h2>
+      <p>Ask me about government schemes, taxes, pensions, certificates, or any citizen service in your language.</p>
+      <div class="welcome-chips">
+        <span class="welcome-chip" onclick="sendToAgent('What schemes are available for farmers?')">🌾 Farmer schemes</span>
+        <span class="welcome-chip" onclick="sendToAgent('How to apply for PAN card?')">🪪 PAN card</span>
+        <span class="welcome-chip" onclick="sendToAgent('Pension eligibility criteria')">👴 Pension</span>
+        <span class="welcome-chip" onclick="sendToAgent('How to file income tax return?')">🧾 Income tax</span>
+      </div>
+    </div>`;
+  setStatus('Ready to help', '');
+}
+</script>
+</body>
+</html>
